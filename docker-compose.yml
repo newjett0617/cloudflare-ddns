@@ -9,36 +9,24 @@ x-basic-setting: &basic-setting
       max-size: "2G"
       max-file: "2"
       compress: "true"
-  healthcheck:
-    test: [ "CMD-SHELL", "curl --fail http://localhost" ]
-    interval: 30s
-    timeout: 30s
-    start_period: 10s
-    retries: 3
-
-volumes:
-  my-volume:
-    name: my-volume
-    driver: local
 
 networks:
-  my-network:
-    name: my-network
+  cloudflare-ddns:
+    name: cloudflare-ddns
     driver: bridge
-    internal: true
 
 services:
-  my-app:
+  cloudflare-ddns:
     <<: *basic-setting
-    image: docker.io/library/nginx:alpine
-    container_name: my-app
+    image: docker.io/newjett0617/cloudflare-ddns:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cloudflare-ddns
     networks:
-      - my-network
-    expose:
-      - 80
-    ports:
-      - 80:80
+      - cloudflare-ddns
     environment:
-      - foo=bar
-    volumes:
-      - my-volume:/etc/nginx:rw
+      - DOMAIN=${DOMAIN}
+      - ZONE_ID=${ZONE_ID}
+      - API_TOKEN=${API_TOKEN}
+      - INTERVAL_TIME=${INTERVAL_TIME}
